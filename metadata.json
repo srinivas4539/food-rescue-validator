@@ -1,0 +1,8 @@
+{
+  "name": "Food Rescue Validator",
+  "description": "AI-powered tool for Zero Hunger charities to validate food quality, quantity, and safety for donation logistics.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
