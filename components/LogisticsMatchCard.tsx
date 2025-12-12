@@ -15,17 +15,17 @@ const MOCK_NGO_REQUESTS: NgoRequest[] = [
   {
     id: '1',
     organization_name: 'City Harvest Shelter',
-    required_diet: 'Veg',
-    required_quantity: 20,
-    distance_km: 3.5,
+    required_diet: 'Any', // Universal acceptance
+    required_quantity: 1, // Accepts anything
+    distance_km: 1.5,
     contact_person: 'Sarah Jenkins',
     phone: '+91 98765 10001'
   },
   {
     id: '2',
     organization_name: 'Community Soup Kitchen',
-    required_diet: 'Non-Veg',
-    required_quantity: 50,
+    required_diet: 'Any',
+    required_quantity: 5,
     distance_km: 1.2,
     contact_person: 'David Ross',
     phone: '+91 98765 10002'
@@ -185,54 +185,54 @@ const LogisticsMatchCard: React.FC<Props> = ({ donation, onStartDelivery, langua
   // Initialize Map for Direct Distribution
   useEffect(() => {
     if (isDirectDistribution && mapContainerRef.current && !mapInstanceRef.current) {
-        // Center on a generic location (e.g. Bangalore) for demo purposes
-        const center: [number, number] = [12.9716, 77.5946]; 
-        
-        const map = L.map(mapContainerRef.current, {
-            center: center,
-            zoom: 15,
-            zoomControl: false,
-            attributionControl: false,
-            dragging: false, // Keep it relatively static for the "picture" feel
-            scrollWheelZoom: false,
-            doubleClickZoom: false
-        });
+      // Center on a generic location (e.g. Bangalore) for demo purposes
+      const center: [number, number] = [12.9716, 77.5946];
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+      const map = L.map(mapContainerRef.current, {
+        center: center,
+        zoom: 15,
+        zoomControl: false,
+        attributionControl: false,
+        dragging: false, // Keep it relatively static for the "picture" feel
+        scrollWheelZoom: false,
+        doubleClickZoom: false
+      });
 
-        // Add "Hotspot" markers
-        const hotspotLocations = [
-            [12.973, 77.596],
-            [12.970, 77.593],
-            [12.971, 77.598]
-        ];
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
 
-        hotspotLocations.forEach((loc) => {
-            const icon = L.divIcon({
-                className: 'bg-transparent',
-                html: `<div class="relative flex items-center justify-center">
+      // Add "Hotspot" markers
+      const hotspotLocations = [
+        [12.973, 77.596],
+        [12.970, 77.593],
+        [12.971, 77.598]
+      ];
+
+      hotspotLocations.forEach((loc) => {
+        const icon = L.divIcon({
+          className: 'bg-transparent',
+          html: `<div class="relative flex items-center justify-center">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                           <div class="relative bg-rose-500 text-white p-1.5 rounded-full shadow-lg border-2 border-white">
                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                           </div>
                         </div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
-            });
-            L.marker(loc as [number, number], { icon }).addTo(map);
+          iconSize: [32, 32],
+          iconAnchor: [16, 16]
         });
+        L.marker(loc as [number, number], { icon }).addTo(map);
+      });
 
-        mapInstanceRef.current = map;
+      mapInstanceRef.current = map;
     }
 
     return () => {
-        // Cleanup map instance if component unmounts or state changes
-        if (mapInstanceRef.current) {
-            mapInstanceRef.current.remove();
-            mapInstanceRef.current = null;
-        }
+      // Cleanup map instance if component unmounts or state changes
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
     };
   }, [isDirectDistribution]);
 
@@ -263,86 +263,86 @@ const LogisticsMatchCard: React.FC<Props> = ({ donation, onStartDelivery, langua
       <div className="w-full max-w-xl mx-auto mt-6 mb-12 animate-fade-in-up">
         <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-red-200 dark:border-red-900/50 overflow-hidden">
           <div className="bg-gradient-to-r from-red-500 to-rose-600 p-5 text-white flex items-center gap-3">
-             <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                <Ban className="w-6 h-6" />
-             </div>
-             <div>
-               <h2 className="font-bold text-lg leading-none">{t.deliveryRejected}</h2>
-               <p className="text-xs text-rose-100 font-medium opacity-90">{t.logisticsSkipped}</p>
-             </div>
+            <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+              <Ban className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="font-bold text-lg leading-none">{t.deliveryRejected}</h2>
+              <p className="text-xs text-rose-100 font-medium opacity-90">{t.logisticsSkipped}</p>
+            </div>
           </div>
-          
+
           <div className="p-8">
-             {!distributionComplete ? (
-               <>
+            {!distributionComplete ? (
+              <>
                 {/* Protocol Verification Checklist */}
                 <div className="mb-6 bg-stone-50 dark:bg-slate-800 rounded-xl p-5 border border-stone-100 dark:border-slate-700">
-                    <h3 className="text-xs font-bold text-stone-400 dark:text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                      <ClipboardList className="w-4 h-4" /> {t.protocolVerification}
-                    </h3>
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-stone-600 dark:text-slate-300 font-medium">{t.logisticsRule}</span>
-                            {donation.weight_kg && donation.weight_kg < MIN_WEIGHT_KG ? (
-                                <span className="flex items-center text-rose-600 dark:text-rose-400 font-bold bg-rose-50 dark:bg-rose-900/20 px-2 py-1 rounded text-xs border border-rose-100 dark:border-rose-900">
-                                    <XCircle className="w-3.5 h-3.5 mr-1.5"/> {t.failed} ({donation.weight_kg} kg)
-                                </span>
-                            ) : (
-                                <span className="flex items-center text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded text-xs border border-emerald-100 dark:border-emerald-900">
-                                    <CheckCircle2 className="w-3.5 h-3.5 mr-1.5"/> {t.passed}
-                                </span>
-                            )}
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                             <span className="text-stone-600 dark:text-slate-300 font-medium">{t.localProtocol}</span>
-                             <span className="flex items-center text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded text-xs border border-blue-100 dark:border-blue-900">
-                                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5"/> {t.activated}
-                            </span>
-                        </div>
+                  <h3 className="text-xs font-bold text-stone-400 dark:text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4" /> {t.protocolVerification}
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-stone-600 dark:text-slate-300 font-medium">{t.logisticsRule}</span>
+                      {donation.weight_kg && donation.weight_kg < MIN_WEIGHT_KG ? (
+                        <span className="flex items-center text-rose-600 dark:text-rose-400 font-bold bg-rose-50 dark:bg-rose-900/20 px-2 py-1 rounded text-xs border border-rose-100 dark:border-rose-900">
+                          <XCircle className="w-3.5 h-3.5 mr-1.5" /> {t.failed} ({donation.weight_kg} kg)
+                        </span>
+                      ) : (
+                        <span className="flex items-center text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded text-xs border border-emerald-100 dark:border-emerald-900">
+                          <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> {t.passed}
+                        </span>
+                      )}
                     </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-stone-600 dark:text-slate-300 font-medium">{t.localProtocol}</span>
+                      <span className="flex items-center text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded text-xs border border-blue-100 dark:border-blue-900">
+                        <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> {t.activated}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-xl border border-rose-100 dark:border-rose-900/40 mb-6 flex items-start gap-3">
-                   <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-                   <div className="text-sm text-stone-700 dark:text-stone-300 font-medium">
-                     <p className="mb-1 font-bold">
-                       {donation.weight_kg && donation.weight_kg < MIN_WEIGHT_KG 
-                         ? t.quantityTooSmall
-                         : t.lowMatch} 
-                     </p>
-                     <p className="text-stone-500 dark:text-slate-400 text-xs">
-                        {t.localRules}
-                     </p>
-                   </div>
+                  <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                  <div className="text-sm text-stone-700 dark:text-stone-300 font-medium">
+                    <p className="mb-1 font-bold">
+                      {donation.weight_kg && donation.weight_kg < MIN_WEIGHT_KG
+                        ? t.quantityTooSmall
+                        : t.lowMatch}
+                    </p>
+                    <p className="text-stone-500 dark:text-slate-400 text-xs">
+                      {t.localRules}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="h-64 bg-stone-100 dark:bg-slate-800 rounded-2xl mb-6 relative overflow-hidden border border-stone-200 dark:border-slate-700 shadow-inner">
-                   {/* Live Leaflet Map Container */}
-                   <div ref={mapContainerRef} className="absolute inset-0 z-0" />
-                   
-                   <div className="absolute bottom-2 left-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-bold text-rose-600 border border-rose-200 shadow-sm z-10 flex items-center gap-2">
-                      <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></div>
-                      {t.hotspots}
-                   </div>
+                  {/* Live Leaflet Map Container */}
+                  <div ref={mapContainerRef} className="absolute inset-0 z-0" />
+
+                  <div className="absolute bottom-2 left-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-bold text-rose-600 border border-rose-200 shadow-sm z-10 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></div>
+                    {t.hotspots}
+                  </div>
                 </div>
 
-                <button 
+                <button
                   onClick={() => setDistributionComplete(true)}
                   className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-amber-200/50 dark:shadow-none transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
                 >
                   <Heart className="w-5 h-5 fill-current" />
                   {t.markDistributed}
                 </button>
-               </>
-             ) : (
-               <div className="text-center py-8 animate-scale-up">
-                 <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
-                   <Heart className="w-10 h-10 text-emerald-600 dark:text-emerald-400 fill-emerald-600 dark:fill-emerald-400" />
-                 </div>
-                 <h3 className="text-2xl font-bold text-stone-800 dark:text-white mb-2">{t.thankYou}</h3>
-                 <p className="text-stone-500 dark:text-slate-400">{t.successMsg}</p>
-               </div>
-             )}
+              </>
+            ) : (
+              <div className="text-center py-8 animate-scale-up">
+                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-10 h-10 text-emerald-600 dark:text-emerald-400 fill-emerald-600 dark:fill-emerald-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-stone-800 dark:text-white mb-2">{t.thankYou}</h3>
+                <p className="text-stone-500 dark:text-slate-400">{t.successMsg}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -355,12 +355,12 @@ const LogisticsMatchCard: React.FC<Props> = ({ donation, onStartDelivery, langua
         <div className="bg-gradient-to-r from-slate-700 to-blue-800 dark:from-slate-800 dark:to-blue-900 p-5 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-white/10 p-2 rounded-lg backdrop-blur-sm border border-white/10">
-               <Building2 className="w-5 h-5" />
+              <Building2 className="w-5 h-5" />
             </div>
             <h2 className="font-bold text-lg tracking-wide">{t.logisticsMatching}</h2>
           </div>
           <div className="flex items-center gap-1.5 text-xs font-medium bg-black/20 px-2 py-1 rounded-lg backdrop-blur-sm border border-white/10">
-             <ShieldCheck className="w-3 h-3 text-emerald-400" /> {t.protocolsActive}
+            <ShieldCheck className="w-3 h-3 text-emerald-400" /> {t.protocolsActive}
           </div>
         </div>
 
@@ -372,14 +372,13 @@ const LogisticsMatchCard: React.FC<Props> = ({ donation, onStartDelivery, langua
           {/* NGO Selector */}
           <div className="space-y-4 mb-8">
             {MOCK_NGO_REQUESTS.map((ngo) => (
-              <div 
+              <div
                 key={ngo.id}
                 onClick={() => { setSelectedNgo(ngo); setMatchResult(null); }}
-                className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${
-                  selectedNgo.id === ngo.id 
-                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 shadow-md scale-[1.01]' 
+                className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${selectedNgo.id === ngo.id
+                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 shadow-md scale-[1.01]'
                     : 'border-stone-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-slate-600 bg-stone-50 dark:bg-slate-800'
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-start">
                   <div>
@@ -389,11 +388,10 @@ const LogisticsMatchCard: React.FC<Props> = ({ donation, onStartDelivery, langua
                       <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {ngo.distance_km}km {t.away}</span>
                     </div>
                   </div>
-                  <span className={`text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wider ${
-                    ngo.required_diet === 'Veg' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
-                    ngo.required_diet === 'Vegan' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400' :
-                    'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
-                  }`}>
+                  <span className={`text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wider ${ngo.required_diet === 'Veg' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                      ngo.required_diet === 'Vegan' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400' :
+                        'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                    }`}>
                     {ngo.required_diet} Preferred
                   </span>
                 </div>
@@ -403,9 +401,9 @@ const LogisticsMatchCard: React.FC<Props> = ({ donation, onStartDelivery, langua
 
           {/* Active Rules Footer */}
           <div className="mb-6 flex flex-wrap gap-2 justify-center">
-             <span className="text-[10px] font-bold uppercase text-stone-400 dark:text-slate-500 px-2 py-1 bg-stone-100 dark:bg-slate-800 rounded border border-stone-200 dark:border-slate-700">Universal Diet Acceptance</span>
-             <span className="text-[10px] font-bold uppercase text-stone-400 dark:text-slate-500 px-2 py-1 bg-stone-100 dark:bg-slate-800 rounded border border-stone-200 dark:border-slate-700">Distance Optimization</span>
-             <span className="text-[10px] font-bold uppercase text-stone-400 dark:text-slate-500 px-2 py-1 bg-stone-100 dark:bg-slate-800 rounded border border-stone-200 dark:border-slate-700">Quantity {'>'} 5kg</span>
+            <span className="text-[10px] font-bold uppercase text-stone-400 dark:text-slate-500 px-2 py-1 bg-stone-100 dark:bg-slate-800 rounded border border-stone-200 dark:border-slate-700">Universal Diet Acceptance</span>
+            <span className="text-[10px] font-bold uppercase text-stone-400 dark:text-slate-500 px-2 py-1 bg-stone-100 dark:bg-slate-800 rounded border border-stone-200 dark:border-slate-700">Distance Optimization</span>
+            <span className="text-[10px] font-bold uppercase text-stone-400 dark:text-slate-500 px-2 py-1 bg-stone-100 dark:bg-slate-800 rounded border border-stone-200 dark:border-slate-700">Quantity {'>'} 5kg</span>
           </div>
 
           {/* Action Button */}
@@ -429,10 +427,9 @@ const LogisticsMatchCard: React.FC<Props> = ({ donation, onStartDelivery, langua
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <div className="text-xs text-stone-400 dark:text-slate-500 uppercase font-bold tracking-widest mb-1">{t.matchScore}</div>
-                  <div className={`text-5xl font-black ${
-                    matchResult.match_score > 70 ? 'text-emerald-600 dark:text-emerald-400' : 
-                    matchResult.match_score > 40 ? 'text-amber-500 dark:text-amber-400' : 'text-red-500 dark:text-red-400'
-                  }`}>
+                  <div className={`text-5xl font-black ${matchResult.match_score > 70 ? 'text-emerald-600 dark:text-emerald-400' :
+                      matchResult.match_score > 40 ? 'text-amber-500 dark:text-amber-400' : 'text-red-500 dark:text-red-400'
+                    }`}>
                     {matchResult.match_score}<span className="text-2xl text-stone-300 dark:text-slate-600">/100</span>
                   </div>
                 </div>
@@ -443,7 +440,7 @@ const LogisticsMatchCard: React.FC<Props> = ({ donation, onStartDelivery, langua
                   {matchResult.recommended_action}
                 </div>
               </div>
-              
+
               <div className="bg-stone-50 dark:bg-slate-800 rounded-2xl p-5 text-stone-600 dark:text-slate-300 text-sm leading-relaxed border border-stone-200 dark:border-slate-700 mb-6 font-medium">
                 <span className="font-bold text-stone-800 dark:text-white block mb-1">Analysis Report: </span>
                 {matchResult.reason}

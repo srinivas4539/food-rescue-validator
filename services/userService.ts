@@ -62,3 +62,8 @@ export const addRewardPoints = async (uid: string, pointsToAdd: number): Promise
         });
     }
 };
+
+export const updateUserRole = async (uid: string, newRole: UserRole): Promise<void> => {
+    const docRef = doc(db, "users", uid);
+    await setDoc(docRef, { role: newRole }, { merge: true });
+};

@@ -323,11 +323,10 @@ const AppContent: React.FC = () => {
     const mockUser: UserProfile = {
       id: firebaseUser?.uid || `u${Math.floor(Math.random() * 1000)}`,
       name: customProfile?.name || (role === 'DONOR' ? 'Alex Johnson' : role === 'NGO' ? 'Sarah Jenkins' : 'Admin User'),
-      role: role,
-      safetyScore: role === 'DONOR' ? 95 : undefined,
       organization: role === 'NGO' ? customProfile?.organization || 'City Harvest Shelter' : undefined,
       internshipStartDate: role === 'NGO' ? new Date().toISOString() : undefined,
-      ...customProfile
+      ...customProfile,
+      role: role, // Explicitly set role LAST to ensure button selection wins
     };
     setCurrentUser(mockUser);
     setView('DASHBOARD');
@@ -360,9 +359,7 @@ const AppContent: React.FC = () => {
       setAppState(AppState.SUCCESS);
     } catch (err: any) {
       console.error(err);
-      const errorMessage = err.message?.includes('fetch')
-        ? "Network Error. Weak connection detected."
-        : "Failed to process image. Try a smaller photo.";
+      const errorMessage = err.message || "Failed to process image.";
       setError(errorMessage);
       setAppState(AppState.ERROR);
     }
@@ -541,7 +538,7 @@ const AppContent: React.FC = () => {
             <main className="flex-grow flex flex-col items-center w-full">
               <MainContent
                 view={view}
-                // ... (other props)
+
                 onAwardPoints={handleAwardPoints}
                 setView={setView}
                 user={currentUser}

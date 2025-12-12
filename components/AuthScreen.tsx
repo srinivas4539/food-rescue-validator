@@ -128,7 +128,13 @@ const AuthScreen: React.FC<Props> = ({ onLogin, language = 'en', setLanguage }) 
       // Check if profile exists
       let profile = await getUserProfile(firebaseUser.uid);
 
-      if (!profile) {
+      if (profile) {
+        // Update role if different from selection
+        if (profile.role !== selectedRole) {
+          await import('../services/userService').then(s => s.updateUserRole(firebaseUser.uid, selectedRole));
+          profile.role = selectedRole; // Update local object
+        }
+      } else {
         // Create new profile with selected role
         profile = await createUserProfile(firebaseUser.uid, selectedRole, {
           name: firebaseUser.displayName || 'User',
@@ -137,7 +143,7 @@ const AuthScreen: React.FC<Props> = ({ onLogin, language = 'en', setLanguage }) 
       }
 
       // Login with profile
-      onLogin(profile.role, profile);
+      onLogin(selectedRole, profile);
       setShowLoginModal(false);
     } catch (error) {
       console.error("Profile creation/fetch failed:", error);

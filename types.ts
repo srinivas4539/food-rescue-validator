@@ -23,7 +23,7 @@ export interface ChefAnalysisResult {
 export interface NgoRequest {
   id: string;
   organization_name: string;
-  required_diet: 'Veg' | 'Non-Veg' | 'Vegan';
+  required_diet: 'Veg' | 'Non-Veg' | 'Vegan' | 'Any';
   required_quantity: number;
   distance_km: number;
   contact_person: string;

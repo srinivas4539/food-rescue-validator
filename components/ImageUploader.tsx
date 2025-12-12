@@ -37,6 +37,8 @@ const TEXTS = {
   }
 };
 
+import imageCompression from 'browser-image-compression';
+
 const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoading, isLiteMode = false, language = 'en' }) => {
   const [dragActive, setDragActive] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
@@ -44,68 +46,41 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoadin
 
   const t = TEXTS[language];
 
-  const compressImage = (file: File): Promise<{ base64: string; preview: string }> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          // Resize logic: Max dimension 800px for "Village/Lite" usage
-          const MAX_WIDTH = 800;
-          const MAX_HEIGHT = 800;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-
-          // Compress to JPEG with 0.6 quality (High compression for low bandwidth)
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-          const base64 = dataUrl.split(',')[1];
-          resolve({ base64, preview: dataUrl });
-        };
-        img.onerror = (error) => reject(error);
-      };
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   const handleFile = async (file: File) => {
     if (file && file.type.startsWith('image/')) {
       try {
         setIsCompressing(true);
-        // Always compress to save bandwidth for rural users
-        const { base64, preview } = await compressImage(file);
-        onImageSelected(base64, preview);
+
+        const options = {
+          maxSizeMB: 0.5, // Aggressive compression for API limits
+          maxWidthOrHeight: 800,
+          useWebWorker: true,
+          initialQuality: 0.7,
+        };
+
+        const compressedFile = await imageCompression(file, options);
+
+        // Convert blob to base64
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          // Extract base64 part
+          const base64Content = base64data.split(',')[1];
+          onImageSelected(base64Content, base64data);
+          setIsCompressing(false);
+        };
+        reader.readAsDataURL(compressedFile);
       } catch (error) {
-        console.error("Compression failed", error);
+        console.error("Compression failed:", error);
         // Fallback to original if compression fails
         const reader = new FileReader();
-        reader.onload = (e) => {
-          const result = e.target?.result as string;
-          const base64Data = result.split(',')[1];
-          onImageSelected(base64Data, result);
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          const base64Content = base64data.split(',')[1];
+          onImageSelected(base64Content, base64data);
+          setIsCompressing(false);
         };
         reader.readAsDataURL(file);
-      } finally {
-        setIsCompressing(false);
       }
     }
   };
@@ -140,8 +115,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoadin
     <div className="w-full max-w-xl mx-auto">
       <div
         className={`relative group border-2 border-dashed rounded-3xl p-8 transition-all duration-300 ease-in-out text-center cursor-pointer
-          ${dragActive 
-            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 scale-[1.02] shadow-xl' 
+          ${dragActive
+            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 scale-[1.02] shadow-xl'
             : 'border-stone-300 dark:border-slate-700 hover:border-emerald-400 dark:hover:border-emerald-500 hover:bg-white dark:hover:bg-slate-900 hover:shadow-lg bg-stone-50 dark:bg-slate-900'
           }
           ${isLoading || isCompressing ? 'opacity-50 pointer-events-none' : ''}
@@ -161,7 +136,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoadin
           onChange={handleChange}
           disabled={isLoading || isCompressing}
         />
-        
+
         <div className="flex flex-col items-center justify-center space-y-4">
           <div className={`p-4 rounded-2xl shadow-md text-emerald-600 dark:text-emerald-400 group-hover:scale-110 group-hover:text-emerald-500 transition-all duration-300 ring-1 ring-emerald-100 dark:ring-emerald-900 ${isLiteMode ? 'bg-stone-100 dark:bg-slate-800 shadow-none' : 'bg-white dark:bg-slate-800'}`}>
             {isCompressing ? <Zap className="w-10 h-10 animate-pulse" /> : <Camera className="w-10 h-10" />}
@@ -174,7 +149,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoadin
               {t.tapToCapture}
             </p>
             <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-2 flex items-center justify-center gap-1">
-               <Zap className="w-3 h-3" /> {t.dataSaver}
+              <Zap className="w-3 h-3" /> {t.dataSaver}
             </p>
           </div>
         </div>

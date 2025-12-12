@@ -18,9 +18,16 @@ const ShiftManager: React.FC<Props> = ({ user, onUpdate }) => {
     }, [user.id]);
 
     const loadActiveShift = async () => {
-        const shift = await getActiveShift(user.id);
-        setActiveShift(shift);
-        setLoading(false);
+        try {
+            if (user && user.id) {
+                const shift = await getActiveShift(user.id);
+                setActiveShift(shift);
+            }
+        } catch (error) {
+            console.error("Failed to load shift", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleCheckIn = async () => {

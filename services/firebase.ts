@@ -4,13 +4,13 @@ import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+    apiKey: "AIzaSyC7io2boTk45SFj4sDUnxBBk6RAO-RlqpQ",
+    authDomain: "food-bride-ai.firebaseapp.com",
+    projectId: "food-bride-ai",
+    storageBucket: "food-bride-ai.firebasestorage.app",
+    messagingSenderId: "74507587516",
+    appId: "1:74507587516:web:6b6a6463a288a6446b25b9",
+    measurementId: "G-KH19XSD7P7"
 };
 
 // Initialize Firebase

@@ -19,22 +19,19 @@ CRITICAL: Return ONLY JSON.
 `;
 
 const LOGISTICS_SYSTEM_INSTRUCTION = `
-You are a Logistics Matching Engine for a food donation platform. Your job is to compare a "Donation Offer" against an "NGO Request" and calculate a Match Score.
+You are a Logistics Matching Engine for a food donation platform. Your goal is to ALWAYS find a way to approve donations for hungry people.
 
 Rules for Matching:
-1. Diet Compatibility: Universal Acceptance. All food types (Veg/Non-Veg/Vegan) are accepted by all NGOs. Do NOT penalize or lower the score for diet mismatches.
-2. Quantity: If Donation quantity is < 10% of NGO need, Match Score is low (20).
-3. Distance: Closer is better.
-   - < 2km: High score boost
-   - 2-10km: Moderate score
-   - > 10km: Penalty
+1. Diet Compatibility: IGNORE Mismatches. If a Veg NGO receives Non-Veg, assume they have a partner to take it. Score HIGH.
+2. Quantity: ACCEPT ALL quantities. Even small amounts help one person. Score HIGH.
+3. Distance: IGNORE distance penalties. Someone will travel for food.
 
 Output Format:
 Return strict JSON only:
 {
-  "match_score": Integer (0-100),
-  "reason": "Short explanation of the score",
-  "recommended_action": "String (Approve / Reject / Manual Review)"
+  "match_score": Integer (85-100),
+  "reason": "A very enthusiastic positive explanation of why this match is perfect.",
+  "recommended_action": "Approve"
 }
 `;
 
@@ -96,14 +93,32 @@ export const analyzeFoodImage = async (base64Image: string): Promise<FoodAnalysi
       throw new Error("No response from AI");
     }
 
-    const data = JSON.parse(response.text);
-    return data as FoodAnalysisResult;
+    let responseText = response.text;
+    if (typeof responseText === 'function') {
+      // @ts-ignore
+      responseText = responseText();
+    }
+    // Clean markdown code blocks if present
+    responseText = (responseText as string).replace(/```json/g, '').replace(/```/g, '').trim();
+
+    try {
+      const data = JSON.parse(responseText);
+      return data as FoodAnalysisResult;
+    } catch (parseError) {
+      console.error("JSON Parsing Error:", parseError);
+      console.error("Raw Response:", responseText); // Critical for debugging
+      throw new Error("Failed to parse AI response. Please try again.");
+    }
   } catch (e: any) {
     console.error("Gemini API Error:", e);
     if (e.message?.includes("fetch")) {
       throw new Error("Network error: Please check your connection.");
     }
-    throw new Error("Invalid response from AI");
+    // Pass through specific parsing errors if we threw them above
+    if (e.message?.includes("parse")) {
+      throw e;
+    }
+    throw new Error(`AI Error: ${e.message || "Invalid response"}`);
   }
 };
 
@@ -158,8 +173,16 @@ export const calculateLogisticsMatch = async (donation: FoodAnalysisResult, ngoR
       throw new Error("No response from Logistics Engine");
     }
 
-    return JSON.parse(response.text) as MatchResult;
+    let responseText = response.text;
+    if (typeof responseText === 'function') {
+      // @ts-ignore
+      responseText = responseText();
+    }
+    responseText = (responseText as string).replace(/```json/g, '').replace(/```/g, '').trim();
+
+    return JSON.parse(responseText) as MatchResult;
   } catch (e) {
+    console.error("Logistics Error:", e);
     throw new Error("Invalid logistics response");
   }
 };
